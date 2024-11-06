@@ -1,7 +1,12 @@
 import requests
 import json
 import uuid
+import tkinter as tk
+from tkinter import scrolledtext
+import threading
+import time
 
+# 初始化URL和请求头
 url = 'https://qianwen.biz.aliyun.com/dialog/conversation'
 
 headers = {
@@ -16,15 +21,47 @@ session_id = "f250331744e543d390a57c7ef2004d72"  # 可初始化为固定的 sess
 session_type = "text_chat"
 parent_msg_id = "478498164b6646dea1b3eede1bf27116"
 
-while True:
-    # 用户输入提问内容
-    user_content = input("请输入您的问题（输入 'exit' 退出）：")
-    
-    # 检查用户输入是否为 'exit'，若是则结束循环
-    if user_content.lower() == "exit":
-        print("结束对话。")
-        break
+# 创建主窗口
+root = tk.Tk()
+root.title("深哥通义 AI 聊天")
 
+# 增加窗口大小
+root.geometry("800x550")  # 增加窗口宽度和高度
+
+# 设置全局字体
+default_font = ("Arial", 14)
+
+# 创建滚动的输出框
+output_text = scrolledtext.ScrolledText(root, height=20, width=70, wrap=tk.WORD, font=default_font)
+output_text.grid(row=0, column=0, columnspan=2, padx=20, pady=20)
+output_text.insert(tk.END, "欢迎提问！\n\n")
+
+# 创建输入框
+input_text = tk.Entry(root, width=50, font=default_font)
+input_text.grid(row=1, column=0, padx=20, pady=10)
+
+# 显示加载动画的标签
+loading_label = tk.Label(root, text="", fg="red", font=default_font)
+loading_label.grid(row=1, column=1, padx=10)
+
+# 发送按钮点击事件
+def send_message():
+    global request_id, session_id, parent_msg_id  # 使用 global 关键字声明使用外部变量
+
+    user_content = input_text.get()
+    
+    if user_content.lower() == "exit":
+        output_text.insert(tk.END, "结束对话。\n")
+        root.quit()
+        return
+
+    # 清空输入框
+    input_text.delete(0, tk.END)
+
+    # 显示"请稍等..."消息
+    loading_label.config(text="请稍等...")
+
+    # 构造请求数据
     data = {
         "model": "",
         "action": "next",
@@ -52,12 +89,76 @@ while True:
         ]
     }
 
-    # 发送请求
-    response = requests.post(url, data=json.dumps(data), headers=headers)
+    # 使用线程避免阻塞
+    threading.Thread(target=send_request, args=(data,)).start()
 
-    # 检查响应状态
-    if response.status_code == 200:
-        response_text = response.text
-        
-    # 输出响应内容
-        print(response_text)
+def send_request(data):
+    global request_id, session_id, parent_msg_id
+    
+    # 发送请求
+    try:
+        response = requests.post(url, data=json.dumps(data), headers=headers)
+
+        # 处理响应
+        if response.status_code == 200:
+            response_text = response.text
+            if response_text:
+                data_chunks = response_text.split('data: ')
+                extracted_jsons = []
+                for chunk in data_chunks:
+                    json_str = chunk.strip()
+                    if json_str and json_str != '[DONE]':
+                        try:
+                            json_data = json.loads(json_str)
+                            extracted_jsons.append(json_data)
+                        except json.JSONDecodeError:
+                            print("解析JSON时出错:", json_str)
+
+                # 处理提取的 JSON 数据
+                if extracted_jsons:
+                    last_json = extracted_jsons[-1]
+                    if 'contents' in last_json and last_json['contents']:
+                        for content_item in last_json['contents']:
+                            if content_item['contentType'] == 'plugin':
+                                plugin_result = content_item.get('content', '')
+                                if plugin_result:
+                                    try:
+                                        plugin_data = json.loads(plugin_result)
+                                        # display_response(f"插件返回数据：{plugin_data}")
+                                    except json.JSONDecodeError:
+                                        display_response(f"插件返回内容解析失败：{plugin_result}")
+                            elif content_item['contentType'] == 'text':
+                                display_response(f"AI：{content_item.get('content', '未能提取有效内容')}")
+                    else:
+                        display_response("返回内容结构不符合预期")
+                        display_response(f"原始响应内容：{response_text}")
+                    # 更新 requestId, sessionId, parentMsgId
+                    request_id = str(uuid.uuid4())  # 每次生成一个新的 requestId
+                    session_id = last_json.get("sessionId", session_id)
+                    parent_msg_id = last_json.get("msgId", parent_msg_id)
+                else:
+                    display_response("响应内容为空")
+            else:
+                display_response("响应内容为空")
+        else:
+            display_response(f"请求失败，状态码：{response.status_code}")
+    except Exception as e:
+        display_response(f"请求失败，错误信息：{str(e)}")
+    finally:
+        loading_label.config(text="")  # 请求结束后清除“请稍等...”
+
+
+def display_response(message):
+    # 在 GUI 中显示响应
+    output_text.insert(tk.END, f"{message}\n")
+    output_text.yview(tk.END)
+
+# 发送按钮
+send_button = tk.Button(root, text="发送", command=send_message)
+send_button.grid(row=1, column=2, padx=10)
+
+# 按回车键发送消息
+root.bind('<Return>', lambda event: send_message())
+
+# 启动 GUI 主循环
+root.mainloop()

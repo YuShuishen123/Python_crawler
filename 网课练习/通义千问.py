@@ -54,6 +54,7 @@ while True:
 
     # 发送请求
     response = requests.post(url, data=json.dumps(data), headers=headers)
+    
 
     # 检查响应状态
     if response.status_code == 200:
@@ -86,12 +87,12 @@ while True:
                             if plugin_result:
                                 try:
                                     plugin_data = json.loads(plugin_result)
-                                    print("插件返回数据：", plugin_data)
+                                    # print("插件返回数据：", plugin_data)
                                 except json.JSONDecodeError:
                                     print("插件返回内容解析失败：", plugin_result)
                         elif content_item['contentType'] == 'text':
                             # 处理文本内容
-                            print("回答：", content_item.get("content", "未能提取有效内容"))
+                            print("AI：", content_item.get("content", "未能提取有效内容"))
 
                 else:
                     print("返回内容结构不符合预期")
@@ -105,4 +106,4 @@ while True:
         else:
             print("响应内容为空")
     else:
-        print("请求失败，状态码：", response.status_code)
+        print("请求失败，状态码：", response.status_code) 
