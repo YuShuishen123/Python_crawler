@@ -4,7 +4,6 @@ import uuid
 import tkinter as tk
 from tkinter import scrolledtext
 import threading
-import time
 
 # 初始化URL和请求头
 url = 'https://qianwen.biz.aliyun.com/dialog/conversation'
@@ -34,7 +33,7 @@ default_font = ("Arial", 14)
 # 创建滚动的输出框
 output_text = scrolledtext.ScrolledText(root, height=20, width=70, wrap=tk.WORD, font=default_font)
 output_text.grid(row=0, column=0, columnspan=2, padx=20, pady=20)
-output_text.insert(tk.END, "欢迎提问！\n\n")
+output_text.insert(tk.END, "欢迎提问！\n\n")  
 
 # 创建输入框
 input_text = tk.Entry(root, width=50, font=default_font)
