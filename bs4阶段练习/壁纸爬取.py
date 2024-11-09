@@ -48,8 +48,10 @@ for i in a_list:
               img_url = div.get('src')
               print(f"找到图片: {img_url}")
               
-              # 下载图片
+              # 生成图片文件名
               img_name = img_url.split('/')[-1]
+              
+              # 下载图片
               img_resp = requests.get(img_url, headers=headers)
               with open(f"wallpapers/{img_name}", 'wb') as f:
                   f.write(img_resp.content)
