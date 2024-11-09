@@ -25,7 +25,7 @@ if response.status_code == 200:
     
     # 获取新闻列表
     news_list = data.get('data', {}).get('list', [])
-    for i, item in enumerate(news_list, start=1):
+    for i, item in enumerate(news_list, start=1): # 遍历新闻列表
         # 打印新闻信息
         print("新闻标题:", item['title'])
         print("概括:", item['brief'])
