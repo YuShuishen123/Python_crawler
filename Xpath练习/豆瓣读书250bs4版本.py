@@ -16,12 +16,12 @@ with open('douban_books完整.csv', 'w', encoding='utf-8-sig', newline='') as f:
     writer.writerow(['排名', '书名', '简介','作者', '评分', '评分人数', '链接'])
     rank = 1
 
-    with requests.Session() as session:
+    with requests.Session() as session: # 使用session来保持cookie
         session.headers.update(headers)
         start = 0
         while start < 250:
             try:
-                resp = session.get(url, params={'start': start})
+                resp = session.get(url, params={'start': start}) # 使用session来保持cookie
                 resp.encoding = 'utf-8'
                 resp.raise_for_status()
 
@@ -35,9 +35,11 @@ with open('douban_books完整.csv', 'w', encoding='utf-8-sig', newline='') as f:
                     
                     book_introduction = []   # 该列表用于存放该页面所有书籍的简介
                     books = main_page.xpath('//tr[@class="item"]')  # 获取并且切割所有书籍元素
-                    for book in books:  # 遍历每一本书，去判断该本书是否有简介
-                        intro = book.xpath('.//span[@class="inq"]/text()')  # .//的方法使其只获取当前这本书的简介，有简介的话写入该本书独自的introl列表，也就是intro[0],否则的话列表为空
-                        book_introduction.append(intro[0] if intro else "无简介")  # 如果简介为空，则置为"无简介"，如果intro[0]存在,则添加到该页全部书籍简介列表中
+                    for book in books:  # 遍历每一本书的整体元素，去判断该本书是否有简介
+                        # .//的方法使其只获取当前这本书的简介，有简介的话写入该本书独自的introl列表，也就是intro[0],否则的话列表为空
+                        intro = book.xpath('.//span[@class="inq"]/text()')  
+                        # 如果简介为空，则置为"无简介"，如果intro[0]存在,则添加到该页全部书籍简介列表中
+                        book_introduction.append(intro[0] if intro else "无简介")  
                         # 这样可以准确判断每一本书是否简介为空，并且确保该页全部书籍简介列表中简介的准确性，不会错位
 
                     # 数据完整性检查（不包括简介）
