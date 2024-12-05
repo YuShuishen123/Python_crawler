@@ -12,10 +12,8 @@ headers = {
     'Cookie': 'll="118339"; bid=gvdQJaPULbM; _pk_id.100001.3ac3=ffc46278de69d4e5.1727428195.; viewed="1859140"; dbcl2="200350411:1dp+uvVrbs0"; push_noty_num=0; push_doumail_num=0; ck=8Oo-; ap_v=0,6.0;'
 }
 
-with open('douban_books完整test.csv', 'w', encoding='utf-8-sig', newline='') as f:
+with open('douban_books年度图书完整test.csv', 'w', encoding='utf-8-sig', newline='') as f:
     writer = csv.writer(f)
-
-    # ... existing code ...
 
     with requests.Session() as session:
         session.headers.update(headers)
@@ -74,8 +72,6 @@ with open('douban_books完整test.csv', 'w', encoding='utf-8-sig', newline='') a
                 
             # 添加随机延迟
             time.sleep(random.uniform(1, 2))
-
-# ... existing code ...
 
 resp.close()
         
