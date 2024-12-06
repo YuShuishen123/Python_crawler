@@ -1,0 +1,11 @@
+第129页请求失败，状态码: 403
+第132页请求失败，状态码: 403
+第133页请求失败，状态码: 403
+第135页请求失败，错误: HTTPSConnectionPool(host='read.douban.com', port=443): Max retries exceeded with url: /kind/100 (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001D1B1397200>: Failed to establish a new connection: [WinError 10061] 由于目标计算机积极拒绝，无法连接。')))
+第265页请求失败，状态码: 403
+第276页请求失败，状态码: 403
+第280页请求失败，状态码: 403
+第282页请求失败，状态码: 403
+第284页请求失败，状态码: 403
+第286页请求失败，状态码: 403
+
